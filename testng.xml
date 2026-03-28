@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+<suite name="example test Suite" verbose="1">
+<!--    <listeners>-->
+<!--        <listener class-name="com.globant.sauceProject.listeners.Listeners"/>-->
+<!--    </listeners>-->
+    <test name="Test">
+        <parameter name="city" value="Bogotá, Colombia"/>
+<!--        <parameter name="destinCity" value="Medellin, Colombia (MDE)"/>-->
+        <parameter name="destinCity" value="Bogotá, Colombia"/>
+        <classes>
+            <class name="com.aviatur.test.HomeFlightsTest"/>
+        </classes>
+    </test>
+</suite>
