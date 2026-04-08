@@ -13,8 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.openqa.selenium.support.PageFactory;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 public class BasePage {
 
@@ -127,6 +128,7 @@ public class BasePage {
                         System.out.println(count + " opciones encontradas");
                         String needle = normalizeText(optionText);
 
+                        // Primero buscar coincidencia exacta normalizada
                         WebElement exactOption = null;
                         for (WebElement option : options) {
                                 String name = normalizeText(option.getAttribute("data-name"));
@@ -140,32 +142,50 @@ public class BasePage {
                         }
 
                         if (exactOption != null) {
-                                System.out.println("Buscando opción exacta: " + optionText);
+                                System.out.println("Opción exacta encontrada: " + optionText);
                                 wait.until(ExpectedConditions.visibilityOf(exactOption));
-                                System.out.println("Opción encontrada: " + optionText);
                                 clickOn(exactOption);
                                 System.out.println("Opción seleccionada: " + optionText);
                                 return;
                         }
 
-                        System.out.println("No se encontró opción exacta: " + optionText + ", buscando la mejor coincidencia...");
-                        WebElement bestOption = null;
-                        int bestScore = -1;
+                        // Segundo: buscar por startsWith (mayor prioridad)
+                        WebElement startWithOption = null;
+                        for (WebElement option : options) {
+                                String name = normalizeText(option.getAttribute("data-name"));
+                                if (name.isEmpty()) {
+                                        name = normalizeText(option.getText());
+                                }
+                                if (name.startsWith(needle)) {
+                                        startWithOption = option;
+                                        System.out.println("Opción encontrada (startsWith): " + name);
+                                        clickOn(startWithOption);
+                                        return;
+                                }
+                        }
 
+                        System.out.println("No se encontró opción exacta ni con startsWith para: " + optionText + ", buscando mejor coincidencia...");
+
+                        // Tercero: buscar por código IATA
                         for (WebElement option : options) {
                                 String cityCode = option.getAttribute("data-city-code");
                                 if (cityCode != null && cityCode.equalsIgnoreCase(optionText)) {
+                                        System.out.println("Opción encontrada (IATA): " + cityCode);
                                         clickOn(option);
                                         return;
                                 }
                         }
 
+                        // Cuarto: buscar por mejor score de similitud
+                        WebElement bestOption = null;
+                        int bestScore = -1;
                         for (WebElement option : options) {
                                 String name = normalizeText(option.getAttribute("data-name"));
                                 if (name.isEmpty()) {
                                         name = normalizeText(option.getText());
                                 }
                                 int score = getMatchScore(needle, name);
+                                System.out.println("Opción: " + name + " - Score: " + score);
                                 if (score > bestScore) {
                                         bestScore = score;
                                         bestOption = option;
@@ -173,19 +193,14 @@ public class BasePage {
                         }
 
                         if (bestOption != null && bestScore > 0) {
+                                System.out.println("Mejor coincidencia seleccionada con score: " + bestScore);
                                 clickOn(bestOption);
                                 return;
                         }
 
-                        for (WebElement option : options) {
-                                String text = normalizeText(option.getText());
-                                if (text.equals(needle)) {
-                                        clickOn(option);
-                                        return;
-                                }
-                        }
+                        System.out.println("No se pudo seleccionar ninguna opción para: " + optionText);
                 } catch (Exception e) {
-                        System.out.println("No se pudo seleccionar la opción '" + optionText + "' del autocompletado.");
+                        System.out.println("Error en selectFromAutocomplete para '" + optionText + "': " + e.getMessage());
                         e.printStackTrace();
                 }
         }
@@ -373,5 +388,15 @@ public class BasePage {
 
                 // 2. Hacer clic en el elemento
                 element.click();
+        }
+
+        /**
+         * Metodo para obtener la fecha de hoy y agregarle 60 días, formateada como dd/MM/yyyy
+         */
+        public String getDatePlus30DaysFormatted() {
+                LocalDate today = LocalDate.now();
+                LocalDate futureDate = today.plusDays(30);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                return futureDate.format(formatter);
         }
 }

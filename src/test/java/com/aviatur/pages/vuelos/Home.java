@@ -48,8 +48,16 @@ public class Home extends BasePage {
     @FindBy(css = "li[data-value-for-input]")
     private List<WebElement> optionsSearch;
 
-    @FindBy(id = "js-createDatepicker1")
+//    @FindBy(id = "js-createDatepicker1")
+//    @FindBy(id = "js-month-datePicker-1")
+    @FindBy(name = "dateDepartureFormatted")
     private WebElement dateLeave;
+
+    @FindBy(className = "js-month-datePicker-1")
+    private WebElement month1;
+
+    @FindBy(xpath = "//button[contains(@data-type, 'next')]")
+    private WebElement btnNextMonth;
 
     @FindBy(id = "js-createDatepicker-return1")
     private WebElement dateReturn;
@@ -149,6 +157,9 @@ public class Home extends BasePage {
         super(driver);
     }
 
+    /**
+     * Metodo para dar clic al campo ciudad de origen
+     */
     public void clickOnOrigin(){
         if (origin != null) {
             clickOn(origin);
@@ -156,7 +167,10 @@ public class Home extends BasePage {
             System.out.println("Fallo al dar click para ingresar ciudad de Origen.");
         }
     }
-    
+
+    /**
+     * Metodo para agregar la ciudad de origen
+     */
     public void inputOrigin(String city, String iataOrigin){
 
         if(txtOrigen != null) {
@@ -167,6 +181,9 @@ public class Home extends BasePage {
         }
     }
 
+    /**
+     * Metodo para dar clic al campo ciudad de destino
+     */
     public void clickOnDestin(){
 
         if(destin != null) {
@@ -177,6 +194,9 @@ public class Home extends BasePage {
         }
     }
 
+    /**
+     * Metodo para agregar la ciudad de destino
+     */
     public void inputDestin(String destinCity, String iataDestin){
 
         if(txtDestin != null) {
@@ -201,6 +221,33 @@ public class Home extends BasePage {
         waitForElementToAppear(txtSameOrigin);
         clickAndHighlight(txtSameOrigin);
         return getTxtValidation(txtSameOrigin);
+    }
+
+    /**
+     * Metodo que selecciona día según el número que se le pase
+     */
+    public void selectDay(int day) {
+        String dayText = String.valueOf(day);
+        WebElement dayElement = month1.findElement(
+                By.xpath(".//*[normalize-space() = '" + dayText + "']")
+        );
+        dayElement.click();
+    }
+
+    /**
+     * Metodo para seleccionar una fecha
+     */
+    public void selectFirstDate(int day){
+        clickAndHighlight(dateLeave);
+        System.out.println(month1);
+        waitForElementToAppear(month1);
+        for (int i = 0; i < 4; i++) {
+            clickAndHighlight(btnNextMonth);
+        }
+        System.out.println(month1);
+        waitForElementToAppear(month1);
+        selectDay(day);
+
     }
 
 }
