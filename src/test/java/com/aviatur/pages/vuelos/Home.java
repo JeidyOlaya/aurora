@@ -1,9 +1,9 @@
 package com.aviatur.pages.vuelos;
 
 import com.aviatur.base.BasePage;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.FindBy;
 
 import java.util.List;
@@ -22,16 +22,31 @@ public class Home extends BasePage {
     private WebElement txtSameOrigin;
 
     @FindBy(id = "js-iata-code-origin")
+    private WebElement origin;
+
+    @FindBy(id = "js-origin-input")
     private WebElement txtOrigen;
 
-    @FindBy(id = "js-container-general-text-origin-")
+    @FindBy(id = "js-origin-input-iata")
+    private WebElement txtIataOrigin;
+
+    @FindBy(css = "div[id^='js-autocomplete-searcher-origin']")
     private WebElement containerOptionOrigin;
 
     @FindBy(id = "js-iata-code-destination")
+    private WebElement destin;
+
+    @FindBy(id = "js-destination-input")
     private WebElement txtDestin;
 
-    @FindBy(id = "js-container-general-text-destination-")
+    @FindBy(id = "js-destination-input-iata")
+    private WebElement txtIataDestin;
+
+    @FindBy(css = "div[id^='js-autocomplete-searcher-destination']")
     private WebElement containerOptionDestination;
+
+    @FindBy(css = "li[data-value-for-input]")
+    private List<WebElement> optionsSearch;
 
     @FindBy(id = "js-createDatepicker1")
     private WebElement dateLeave;
@@ -126,39 +141,66 @@ public class Home extends BasePage {
     @FindBy(id = "remove-flight")
     private WebElement removeFlight;
 
+    @FindBy(css = "//div[contains(@data-testid, 'same-origin-destination-tooltip')]")
+    //span[contains (text(), "Origen y destino no pueden ser iguales")]
+    private WebElement txtValidationDestin;
+
     public Home (WebDriver driver){
         super(driver);
     }
 
     public void clickOnOrigin(){
-        if (txtOrigen != null) {
-            clickOn(txtOrigen);
+        if (origin != null) {
+            clickOn(origin);
+        }else {
+            System.out.println("Fallo al dar click para ingresar ciudad de Origen.");
         }
     }
     
-    public void inputOrigin(String city){
+    public void inputOrigin(String city, String iataOrigin){
 
         if(txtOrigen != null) {
-            writeText(txtOrigen, containerOptionOrigin, city);
+            typeText(txtOrigen, city);
+            waitForElementToAppear(containerOptionOrigin);
+            // Seleccionar la opción más parecida por texto ingresado
+            selectFromAutocomplete(containerOptionOrigin, By.cssSelector("li[data-value-for-input]"), city);
         }
     }
 
     public void clickOnDestin(){
 
-        if(txtDestin != null) {
-            clickOn(txtDestin);
+        if(destin != null) {
+            clickAndHighlight(destin);
+            clickOn(destin);
+        }else {
+            System.out.println("Fallo al dar click para ingresar ciudad de Destino.");
         }
     }
 
-    public void inputDestin(String destinCity){
+    public void inputDestin(String destinCity, String iataDestin){
 
         if(txtDestin != null) {
-            writeText(txtDestin, containerOptionDestination, destinCity);
+            typeText(txtDestin, destinCity);
+            // Esperar que aparezcan las opciones de autocompletado
+            waitForElementToAppear(containerOptionDestination);
+            // Seleccionar la opción más parecida por texto ingresado
+            selectFromAutocomplete(containerOptionDestination, By.cssSelector("li[data-value-for-input]"), destinCity);
         }
     }
 
-    @Override
-    public String getTxtValidation(WebElement txtSameOrigin) {
-        return super.getTxtValidation(txtSameOrigin);
+    public void clickOnBtnSearch(){
+        clickAndHighlight(btnSearchFlights);
+        clickOn(btnSearchFlights);
+        System.out.println("Se da clic en el boton Buscar");
     }
+
+    /**
+     * Metodo para obtener el mensaje de validación de mismo origen-destino
+     */
+    public String getSameOriginValidationMessage() {
+        waitForElementToAppear(txtSameOrigin);
+        clickAndHighlight(txtSameOrigin);
+        return getTxtValidation(txtSameOrigin);
+    }
+
 }
