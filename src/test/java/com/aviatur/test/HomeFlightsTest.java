@@ -17,38 +17,22 @@ public class HomeFlightsTest extends BaseTest {
     @DataProvider(name = "flightData")
     public Object[][] flightDataProvider() {
         return new Object[][] {
-                {"Bogotá", "BOG", "Cali", "CLO"}
+                {"Bogotá", "BOG", "Cali", "CLO", 5}
+//            {"Bogotá",  "BOG", "Medellín", "MED"},
+//            {"Bogotá", "BOG", "Bogotá", "BOG"}
         };
     }
 
-    @DataProvider(name = "dates")
-    public Object[][] datesDataProvider() {
-        return new Object[][] {
-                {5},
-                {10},
-        };
-    }
+//    @DataProvider(name = "dates")
+//    public Object[][] datesDataProvider() {
+//        return new Object[][] {
+//                {5},  // Example: select the 5th day of the month
+//                {10}, // Example: select the 10th day of the month
+//        };
+//    }
 
-    @DataProvider(name = "passengers")
-    public Object[][] passengersDataProvider() {
-        return new Object[][] {
-                {1, 0, 0},  // 1 adulto, 0 niños, 0 infantes
-                {2, 1, 0},  // 2 adultos, 1 niño, 0 infantes
-        };
-    }
-
-    @DataProvider(name = "completeFlightData")
-    public Object[][] completeFlightDataProvider() {
-        return new Object[][] {
-                // {city, iataOrigen, destinCity, iataDestino, dayDate, adults, children, infants}
-                {"Bogotá", "BOG", "Cali", "CLO", 5, 1, 0, 0},
-//                {"Bogotá", "BOG", "Cali", "CLO", 10, 2, 1, 0},
-        };
-    }
-
-    @Test(dataProvider = "completeFlightData")
-    public void initialTest(String city, String iataOrigen, String destinCity, String iataDestino, 
-                            int dayDate, int adults, int children, int infants){
+    @Test(dataProvider = "flightData")
+    public void happyPathDetail(String city, String iataOrigen, String destinCity, String iataDestino, int day ){
         Home home= new Home(driver);
         Dispo dispo = new Dispo(driver);
 
@@ -56,8 +40,7 @@ public class HomeFlightsTest extends BaseTest {
         home.inputOrigin(city, iataOrigen);
         home.clickOnDestin();
         home.inputDestin(destinCity, iataDestino);
-        home.selectFirstDate(dayDate);
-        // home.selectPassengers(adults, children, infants);
+        home.selectDateLeave(day);
 //        home.clickOnBtnSearch();
 //        dispo.getCardsDispo();
 

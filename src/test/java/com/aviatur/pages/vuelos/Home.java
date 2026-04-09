@@ -53,8 +53,11 @@ public class Home extends BasePage {
     @FindBy(name = "dateDepartureFormatted")
     private WebElement dateLeave;
 
-    @FindBy(className = "js-month-datePicker-1")
+    @FindBy(id = "js-month-datePicker-1")
     private WebElement month1;
+
+    @FindBy(id = "js-month-datePicker-2")
+    private WebElement month2;
 
     @FindBy(xpath = "//button[contains(@data-type, 'next')]")
     private WebElement btnNextMonth;
@@ -208,6 +211,9 @@ public class Home extends BasePage {
         }
     }
 
+    /**
+     * Metodo que da clic en el boton buscar
+     */
     public void clickOnBtnSearch(){
         clickAndHighlight(btnSearchFlights);
         clickOn(btnSearchFlights);
@@ -235,19 +241,15 @@ public class Home extends BasePage {
     }
 
     /**
-     * Metodo para seleccionar una fecha
+     * Metodo para seleccionar una fecha de salida
      */
-    public void selectFirstDate(int day){
+    public void selectDateLeave(int day){
         clickAndHighlight(dateLeave);
-        System.out.println(month1);
         waitForElementToAppear(month1);
         for (int i = 0; i < 4; i++) {
             clickAndHighlight(btnNextMonth);
         }
-        System.out.println(month1);
-        waitForElementToAppear(month1);
         selectDay(day);
-
     }
 
 }
