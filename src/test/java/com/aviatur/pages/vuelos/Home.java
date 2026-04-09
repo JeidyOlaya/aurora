@@ -6,7 +6,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
 
 public class Home extends BasePage {
     @FindBy(xpath = "//input[contains(@value, 'round')]")
@@ -72,7 +77,7 @@ public class Home extends BasePage {
     private WebElement btnScheduleArrival;
 
     @FindBy(className = "js-day-in-calendar")
-    private List<WebElement> daysCalendar;
+    private WebElement daysCalendar;
 
     @FindBy(className = "js-option-list-select")
     private List<WebElement> scheduleOptions;
@@ -198,7 +203,7 @@ public class Home extends BasePage {
     }
 
     /**
-     * Metodo para agregar la ciudad de destino
+     * Agrega la ciudad de destino
      */
     public void inputDestin(String destinCity, String iataDestin){
 
@@ -212,7 +217,7 @@ public class Home extends BasePage {
     }
 
     /**
-     * Metodo que da clic en el boton buscar
+     * Intenta dar clic en el boton buscar
      */
     public void clickOnBtnSearch(){
         clickAndHighlight(btnSearchFlights);
@@ -221,35 +226,108 @@ public class Home extends BasePage {
     }
 
     /**
-     * Metodo para obtener el mensaje de validación de mismo origen-destino
+     * Obtener el mensaje de validación de mismo origen-destino
      */
+    // TODO mirar como puedo hacer este método general para ponerlo general en BasePage
     public String getSameOriginValidationMessage() {
         waitForElementToAppear(txtSameOrigin);
         clickAndHighlight(txtSameOrigin);
         return getTxtValidation(txtSameOrigin);
     }
 
-    /**
-     * Metodo que selecciona día según el número que se le pase
-     */
-    public void selectDay(int day) {
-        String dayText = String.valueOf(day);
-        WebElement dayElement = month1.findElement(
-                By.xpath(".//*[normalize-space() = '" + dayText + "']")
-        );
-        dayElement.click();
-    }
+    private static final Locale SPANISH_LOCALE = new Locale("es", "ES");
+    private static final DateTimeFormatter SPANISH_DATE_FORMATTER = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .appendPattern("dd-MMMM-yyyy")
+            .toFormatter(SPANISH_LOCALE);
 
     /**
      * Metodo para seleccionar una fecha de salida
      */
-    public void selectDateLeave(int day){
+    public void selectDateLeave(String dateValue) {
         clickAndHighlight(dateLeave);
         waitForElementToAppear(month1);
-        for (int i = 0; i < 4; i++) {
-            clickAndHighlight(btnNextMonth);
+        LocalDate targetDate = parseSpanishDate(dateValue);
+        selectCalendarDate(targetDate);
+    }
+
+    /**
+     * Metodo para seleccionar la fecha de regreso
+     * @param dateValue
+     */
+    public void selectDateReturn(String dateValue) {
+        waitForElementToAppear(month1);
+        LocalDate targetDate = parseSpanishDate(dateValue);
+        selectCalendarDate(targetDate);
+    }
+
+    /**
+     * Metodo para pasar el dateValue de texto al formato fecha
+     * @param dateValue
+     * @return
+     */
+    private LocalDate parseSpanishDate(String dateValue) {
+        try {
+            return LocalDate.parse(dateValue, SPANISH_DATE_FORMATTER);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Fecha inválida para el calendario: " + dateValue, e);
         }
-        selectDay(day);
+    }
+
+    /**
+     * Metodo donde se pasa la fecha formateada y la busca en el calendario
+     * @param targetDate
+     */
+    private void selectCalendarDate(LocalDate targetDate) {
+        for (int i = 0; i < 12; i++) {
+            if (clickCalendarDay(targetDate)) {
+                return;
+            }
+            clickAndHighlight(btnNextMonth);
+            waitForElementToAppear(month1);
+        }
+        throw new IllegalStateException("No se encontró la fecha " + targetDate + " en el calendario.");
+    }
+
+    /**
+     * Metodo donde busca coincidir día, mes y año en las cards del calendario
+     * @param targetDate
+     * @return
+     */
+    private boolean clickCalendarDay(LocalDate targetDate) {
+        String expectedDay = String.valueOf(targetDate.getDayOfMonth());
+        String expectedMonth = targetDate.getMonth().getDisplayName(TextStyle.FULL, SPANISH_LOCALE);
+        String expectedYear = String.valueOf(targetDate.getYear());
+
+        for (WebElement dayElement : month1.findElements(By.cssSelector(".js-day-in-calendar"))) {
+            if (matchesDay(dayElement, expectedDay, expectedMonth, expectedYear)) {
+                clickAndHighlight(dayElement);
+                return true;
+            }
+        }
+        for (WebElement dayElement : month2.findElements(By.cssSelector(".js-day-in-calendar"))) {
+            if (matchesDay(dayElement, expectedDay, expectedMonth, expectedYear)) {
+                clickAndHighlight(dayElement);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifica si un elemento de día del calendario coincide con la fecha especificada.
+     * Compara los atributos data-day, data-month-name y data-year del elemento con los valores proporcionados.
+     * @param dayElement
+     * @param day
+     * @param month
+     * @param year
+     * @return
+     */
+    private boolean matchesDay(WebElement dayElement, String day, String month, String year) {
+        String dataDay = dayElement.getAttribute("data-day");
+        String dataMonth = dayElement.getAttribute("data-month-name");
+        String dataYear = dayElement.getAttribute("data-year");
+        return day.equals(dataDay) && year.equals(dataYear) && month.equalsIgnoreCase(dataMonth);
     }
 
 }

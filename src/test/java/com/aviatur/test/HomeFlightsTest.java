@@ -17,7 +17,7 @@ public class HomeFlightsTest extends BaseTest {
     @DataProvider(name = "flightData")
     public Object[][] flightDataProvider() {
         return new Object[][] {
-                {"Bogotá", "BOG", "Cali", "CLO", 5}
+                {"Bogotá", "BOG", "Cali", "CLO", "01-Febrero-2027", "05-Abril-2027"}
 //            {"Bogotá",  "BOG", "Medellín", "MED"},
 //            {"Bogotá", "BOG", "Bogotá", "BOG"}
         };
@@ -32,7 +32,7 @@ public class HomeFlightsTest extends BaseTest {
 //    }
 
     @Test(dataProvider = "flightData")
-    public void happyPathDetail(String city, String iataOrigen, String destinCity, String iataDestino, int day ){
+    public void happyPathDetail(String city, String iataOrigen, String destinCity, String iataDestino, String leaveDate, String returnDate ){
         Home home= new Home(driver);
         Dispo dispo = new Dispo(driver);
 
@@ -40,7 +40,8 @@ public class HomeFlightsTest extends BaseTest {
         home.inputOrigin(city, iataOrigen);
         home.clickOnDestin();
         home.inputDestin(destinCity, iataDestino);
-        home.selectDateLeave(day);
+        home.selectDateLeave(leaveDate);
+        home.selectDateReturn(returnDate);
 //        home.clickOnBtnSearch();
 //        dispo.getCardsDispo();
 
