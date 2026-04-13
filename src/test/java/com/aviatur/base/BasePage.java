@@ -391,12 +391,28 @@ public class BasePage {
         }
 
         /**
-         * Metodo para obtener la fecha de hoy y agregarle 60 días, formateada como dd/MM/yyyy
+         * Obtener la fecha de hoy y agregarle 60 días, formateada como dd/MM/yyyy
          */
         public String getDatePlus30DaysFormatted() {
                 LocalDate today = LocalDate.now();
                 LocalDate futureDate = today.plusDays(30);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 return futureDate.format(formatter);
+        }
+
+        /**
+         * Obtener texto como String
+          */
+        public String getText(WebElement locator) {
+                WebElement element = locator;
+                return element.getText().trim();
+        }
+
+        /**
+         *  Obtener texto y convertirlo a int
+         */
+        public int getTextAsInt(WebElement locator) {
+                String text = getText(locator);
+                return Integer.parseInt(text);
         }
 }

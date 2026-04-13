@@ -94,22 +94,22 @@ public class Home extends BasePage {
     @FindBy(xpath = "//div[@data-classproperty='amountInfants']//span[@class='js-counter-passengers']")
     private WebElement countPassengersInf;
 
-    @FindBy(xpath = "(//div[@id='js-home-select-passengers']//button[contains(@class, 'js-change-amount-passengers') and contains(@data-action, 'remove')])[1]")
+    @FindBy(xpath = "//div[@data-classproperty='amountAdults']//button[@data-action='remove']")
     private WebElement removeAdt;
 
-    @FindBy(xpath = "(//div[@id='js-home-select-passengers']//button[contains(@class, 'js-change-amount-passengers') and contains(@data-action, 'remove')])[2]")
+    @FindBy(xpath = "//div[@data-classproperty='amountChildren']//button[@data-action='remove']")
     private WebElement removeChd;
 
-    @FindBy(xpath = "(//div[@id='js-home-select-passengers']//button[contains(@class, 'js-change-amount-passengers') and contains(@data-action, 'remove')])[3]")
+    @FindBy(xpath = "//div[@data-classproperty='amountInfants']//button[@data-action='remove']")
     private WebElement removeInf;
 
-    @FindBy(xpath = "(//div[@id='js-home-select-passengers']//button[contains(@class, 'js-change-amount-passengers') and contains(@data-action, 'add')])[1]")
+    @FindBy(xpath = "//div[@data-classproperty='amountAdults']//button[@data-action='add']")
     private WebElement addAdt;
 
-    @FindBy(xpath = "(//div[@id='js-home-select-passengers']//button[contains(@class, 'js-change-amount-passengers') and contains(@data-action, 'add')])[2]")
+    @FindBy(xpath = "//div[@data-classproperty='amountChildren']//button[@data-action='add']")
     private WebElement addChd;
 
-    @FindBy(xpath = "(//div[@id='js-home-select-passengers']//button[contains(@class, 'js-change-amount-passengers') and contains(@data-action, 'add')])[3]")
+    @FindBy(xpath = "//div[@data-classproperty='amountInfants']//button[@data-action='add']")
     private WebElement addInf;
 
     @FindBy(xpath = "//select[contains(@class,'js-textToChange')]")
@@ -242,9 +242,10 @@ public class Home extends BasePage {
             .toFormatter(SPANISH_LOCALE);
 
     /**
-     * Metodo para seleccionar una fecha de salida
+     * Selecciona una fecha de salida
      */
     public void selectDateLeave(String dateValue) {
+        System.out.println("Empieza la selección de fechas");
         clickAndHighlight(dateLeave);
         waitForElementToAppear(month1);
         LocalDate targetDate = parseSpanishDate(dateValue);
@@ -328,6 +329,31 @@ public class Home extends BasePage {
         String dataMonth = dayElement.getAttribute("data-month-name");
         String dataYear = dayElement.getAttribute("data-year");
         return day.equals(dataDay) && year.equals(dataYear) && month.equalsIgnoreCase(dataMonth);
+    }
+
+    private void setPassengers(WebElement counterLocator, WebElement addButton, int target) {
+
+        int current = getTextAsInt(counterLocator);
+
+        if (current == target) {
+            return;
+        }
+
+        int diff = target - current;
+
+        for (int i = 0; i < diff; i++) {
+            System.out.println("Agregando pasajero: " + (i + 1));
+            clickAndHighlight(addButton);
+        }
+    }
+
+    public void addPassengers(int nAdt, int nChd, int nInf) {
+
+        System.out.println("Empieza la selección de pasajeros");
+
+        setPassengers(countPassengersAdt, addAdt, nAdt);
+        setPassengers(countPassengersChd, addChd, nChd);
+        setPassengers(countPassengersInf, addInf, nInf);
     }
 
 }
